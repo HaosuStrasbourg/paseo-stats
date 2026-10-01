@@ -1,0 +1,6 @@
+{
+  "id": "session-stats",
+  "requirements": {
+    "paseo": ">=0.9.0"
+  }
+}
