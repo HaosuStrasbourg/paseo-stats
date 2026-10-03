@@ -36,7 +36,7 @@ function useDetail(props: PluginButtonContentProps) {
   const agentId = props.context === "agent" ? props.agentId : "";
   const read = useRpc(readDetail);
   return useQuery({
-    queryKey: ["session-stats", "detail", agentId],
+    queryKey: ["paseo-stats", "detail", agentId],
     queryFn: () => read({ agentId }),
     enabled: agentId !== "",
     refetchInterval: 4_000,
@@ -96,7 +96,7 @@ function MutedLine({ left, right, theme }: { left: string; right: string; theme:
 function DailyHeatmap({ provider, theme }: { provider: ProviderId; theme: PluginTheme }) {
   const readMap = useRpc(readHeatmap);
   const heat = useQuery({
-    queryKey: ["session-stats", "heatmap", provider],
+    queryKey: ["paseo-stats", "heatmap", provider],
     queryFn: () => readMap({ provider }),
     refetchInterval: 60_000,
   });

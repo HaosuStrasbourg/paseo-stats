@@ -181,7 +181,7 @@ export function contributePills(client: PluginClientContext): () => void {
           },
         });
       })
-      .catch((error: unknown) => console.warn("[session-stats] agent observation failed", error));
+      .catch((error: unknown) => console.warn("[paseo-stats] agent observation failed", error));
   } else {
     release = paseo.agents.subscribe(onUpdate);
     paseo.agents

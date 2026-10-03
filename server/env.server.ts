@@ -15,7 +15,7 @@ export function paseoHome(): string {
 
 /** This plugin's own state directory. */
 export function stateDir(): string {
-  return path.join(paseoHome(), "session-stats");
+  return path.join(paseoHome(), "paseo-stats");
 }
 
 /** `<root>/projects` for every Claude config dir (CLAUDE_CONFIG_DIR may list several). */

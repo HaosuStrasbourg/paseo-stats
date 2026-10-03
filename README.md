@@ -101,7 +101,7 @@ Grok CLI speaks ACP. Add it as a custom provider in `$PASEO_HOME/config.json`, t
 - **Quota used by the last turn**: reading after the turn ends minus the reading at turn start. `—` if the window reset or no new reading arrived within 90 s.
 - **Tokens in a quota window**: all sessions of that agent on this machine since `reset time − window length`, deduplicated.
 - **Files changed**: only successful write/edit tool calls. Claude counts `+`/`-` lines of the structured patch (a new file counts all its lines); Grok compares the before/after text of each diff. Files are counted once per path.
-- **Heatmap**: daily totals in the host's time zone, five tiers by rank among days with data. Totals are kept in `$PASEO_HOME/session-stats/daily.json` and never lowered, so they survive Claude Code deleting transcripts after 30 days.
+- **Heatmap**: daily totals in the host's time zone, five tiers by rank among days with data. Totals are kept in `$PASEO_HOME/paseo-stats/daily.json` and never lowered, so they survive Claude Code deleting transcripts after 30 days.
 
 ## Privacy and request volume
 
@@ -123,7 +123,7 @@ npm run typecheck
 npm run stats -- <claude-session-id>   # print transcript metrics and daily totals
 ```
 
-State lives in `$PASEO_HOME/session-stats/` (`daily.json`, `live/<agent>.json`).
+State lives in `$PASEO_HOME/paseo-stats/` (`daily.json`, `live/<agent>.json`).
 
 ## License
 

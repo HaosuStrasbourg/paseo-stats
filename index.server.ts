@@ -10,7 +10,7 @@ export default function contribute(server: PluginServerContext) {
   const service = new StatsService(live, daily);
 
   const refreshDaily = () =>
-    void daily.update().catch((error) => console.warn("[session-stats] daily update failed", error));
+    void daily.update().catch((error) => console.warn("[paseo-stats] daily update failed", error));
   refreshDaily();
   // Keeps "today" rolling over even when no turn ends.
   const hourly = setInterval(refreshDaily, 60 * 60_000);
@@ -21,7 +21,7 @@ export default function contribute(server: PluginServerContext) {
     const key = [...input.agentIds].sort().join(",");
     if (key !== lastPillAgents) {
       lastPillAgents = key;
-      console.log(`[session-stats] pills requested for ${input.agentIds.length} agent(s)`);
+      console.log(`[paseo-stats] pills requested for ${input.agentIds.length} agent(s)`);
     }
     return service.pills(input.agentIds).then((pills) => ({ pills }));
   });

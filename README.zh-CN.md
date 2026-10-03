@@ -101,7 +101,7 @@ Grok CLI 支持 ACP 协议。在 `$PASEO_HOME/config.json` 里加一个自定义
 - **上一轮消耗的额度**：本轮结束后的读数 − 本轮开始时的读数。窗口重置过、或 90 秒内没等到新读数时显示 `—`。
 - **额度窗口内的 token**：本机该 agent 所有会话在"重置时间 − 窗口长度"之后的 token，去重后合计。
 - **文件改动**：只算执行成功的写入、编辑类工具。Claude 数结构化差异里的 `+` / `-` 行（新建文件按全部行数计）；Grok 比较每次修改前后的文本。同一文件按路径只算一个。
-- **热力图**：按本机时区分天，在有数据的天里按排名分 5 档。每日合计存在 `$PASEO_HOME/session-stats/daily.json`，只增不减，Claude Code 30 天后删除会话记录也不受影响。
+- **热力图**：按本机时区分天，在有数据的天里按排名分 5 档。每日合计存在 `$PASEO_HOME/paseo-stats/daily.json`，只增不减，Claude Code 30 天后删除会话记录也不受影响。
 
 ## 隐私与请求频率
 
@@ -123,7 +123,7 @@ npm run typecheck
 npm run stats -- <claude-会话ID>   # 打印会话记录统计和每日合计
 ```
 
-插件状态存放在 `$PASEO_HOME/session-stats/`（`daily.json`、`live/<agent>.json`）。
+插件状态存放在 `$PASEO_HOME/paseo-stats/`（`daily.json`、`live/<agent>.json`）。
 
 ## 许可证
 

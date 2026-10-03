@@ -134,7 +134,7 @@ export class LiveTracker {
         const sub = (directory as any).subscription;
         if (sub?.release) this.cleanup.push(() => void sub.release().catch(() => undefined));
       })
-      .catch((error) => console.warn("[session-stats] agent list failed", error));
+      .catch((error) => console.warn("[paseo-stats] agent list failed", error));
     this.flushTimer = setInterval(() => void this.flush(), 5_000);
   }
 
@@ -210,7 +210,7 @@ export class LiveTracker {
         a.unsubscribeTimeline = null;
       });
     } catch (error) {
-      console.warn("[session-stats] timeline subscribe failed", a.agentId, error);
+      console.warn("[paseo-stats] timeline subscribe failed", a.agentId, error);
     }
   }
 

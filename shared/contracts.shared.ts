@@ -140,19 +140,19 @@ export interface PillData {
 }
 
 export const readPills = defineRpc({
-  name: "session-stats.pills",
+  name: "paseo-stats.pills",
   input: z.object({ agentIds: z.array(z.string()).max(200) }),
   output: z.custom<{ pills: PillData[] }>(() => true),
 });
 
 export const readDetail = defineRpc({
-  name: "session-stats.detail",
+  name: "paseo-stats.detail",
   input: z.object({ agentId: z.string() }),
   output: z.custom<SessionDetail>(() => true),
 });
 
 export const readHeatmap = defineRpc({
-  name: "session-stats.heatmap",
+  name: "paseo-stats.heatmap",
   input: z.object({ provider: z.enum(["claude", "grok"]) }),
   output: z.custom<Heatmap>(() => true),
 });
