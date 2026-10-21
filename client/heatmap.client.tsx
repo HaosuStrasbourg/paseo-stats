@@ -2,12 +2,15 @@ import type { PluginTheme } from "@getpaseo/plugin";
 import { useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import type { Heatmap } from "../shared/contracts.shared";
-import { fmtInt, fmtTokens } from "../shared/format.shared";
+import { fmtTokens } from "../shared/format.shared";
 import { T } from "./i18n.client";
 
 const WEEKS = 16;
 const CELL = 12;
 const GAP = 2;
+const GRID_WIDTH = WEEKS * (CELL + GAP) - GAP;
+/** Widest month label at 9px ("10月", "Sep"), with a little slack. */
+const MONTH_LABEL_ROOM = 26;
 const LEVEL_OPACITY = [0.22, 0.4, 0.58, 0.78, 1];
 const DAY_MS = 86_400_000;
 
@@ -68,9 +71,10 @@ export function HeatmapView({ data, theme }: { data: Heatmap; theme: PluginTheme
   const muted = theme.colors.foregroundMuted;
   const empty = theme.colors.surface2;
 
+  // One line, always: short date, weekday, compact total. Anything longer is cut, not wrapped.
   const detail = focus
-    ? `${focus} ${T.weekdayLong(mondayIndex(focus))} · ${
-        data.days[focus] ? T.withDetail(`${fmtTokens(data.days[focus])} tok`, fmtInt(data.days[focus])) : T.noData
+    ? `${T.shortDate(focus)} ${T.weekdayLong(mondayIndex(focus))} · ${
+        data.days[focus] ? `${fmtTokens(data.days[focus])} tok` : T.noData
       }`
     : T.heatmapFooter(data.provider);
 
@@ -85,14 +89,18 @@ export function HeatmapView({ data, theme }: { data: Heatmap; theme: PluginTheme
           ))}
         </View>
         <View>
-          <View style={{ height: 14 }}>
-            {grid.months.map((m, i) =>
-              m ? (
-                <Text key={i} style={{ position: "absolute", left: i * (CELL + GAP), top: 0, fontSize: 9, color: muted }}>
+          <View style={{ height: 14, width: GRID_WIDTH }}>
+            {grid.months.map((m, i) => {
+              if (!m) return null;
+              const left = i * (CELL + GAP);
+              // Near the right edge a left-anchored label has no room and would wrap; anchor it right instead.
+              const anchor = left + MONTH_LABEL_ROOM > GRID_WIDTH ? { right: 0 } : { left };
+              return (
+                <Text key={i} numberOfLines={1} style={{ position: "absolute", ...anchor, top: 0, fontSize: 9, color: muted }}>
                   {m}
                 </Text>
-              ) : null,
-            )}
+              );
+            })}
           </View>
           <View style={{ flexDirection: "row", gap: GAP }}>
             {grid.columns.map((col, w) => (
@@ -126,7 +134,9 @@ export function HeatmapView({ data, theme }: { data: Heatmap; theme: PluginTheme
         </View>
       </View>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-        <Text style={{ fontSize: 11, color: muted, flexShrink: 1 }}>{detail}</Text>
+        <Text numberOfLines={1} style={{ fontSize: 11, color: muted, flexShrink: 1 }}>
+          {detail}
+        </Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
           <Text style={{ fontSize: 9, color: muted, marginRight: 2 }}>{T.less}</Text>
           <View style={{ width: 9, height: 9, borderRadius: 2, backgroundColor: empty }} />

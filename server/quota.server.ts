@@ -83,10 +83,14 @@ export async function readQuota(provider: ProviderId): Promise<QuotaSnapshot | n
   return windows.length > 0 ? { fetchedAtMs, windows } : null;
 }
 
-/** Same window if resetsAt agrees to the minute (the API's reset timestamp jitters by microseconds). */
+/** Same window if reset times agree to the minute (the API's reset timestamp jitters by microseconds). */
+export function sameReset(a: string | null | undefined, b: string | null | undefined): boolean {
+  if (!a || !b) return false;
+  return Math.abs(Date.parse(a) - Date.parse(b)) < 60_000;
+}
+
 function sameWindow(a: QuotaWindow, b: QuotaWindow): boolean {
-  if (a.resetsAt === null || b.resetsAt === null) return false;
-  return Math.abs(Date.parse(a.resetsAt) - Date.parse(b.resetsAt)) < 60_000;
+  return sameReset(a.resetsAt, b.resetsAt);
 }
 
 const DEFAULT_DURATION: Partial<Record<QuotaKey, number>> = { fiveHour: 5 * 3_600_000, sevenDay: 7 * 86_400_000 };

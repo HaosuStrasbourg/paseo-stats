@@ -53,6 +53,8 @@ const zh = {
   weekdays: ["一", "二", "三", "四", "五", "六", "日"],
   weekdayLong: (i: number) => `周${["一", "二", "三", "四", "五", "六", "日"][i]}`,
   month: (m: number) => `${m}月`,
+  /** YYYY-MM-DD -> 9/17 */
+  shortDate: (key: string) => `${Number(key.slice(5, 7))}/${Number(key.slice(8, 10))}`,
   less: "少",
   more: "多",
   noData: "无数据",
@@ -139,6 +141,8 @@ const en: typeof zh = {
   weekdays: ["M", "T", "W", "T", "F", "S", "S"],
   weekdayLong: (i) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i]!,
   month: (m) => ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][m - 1]!,
+  shortDate: (key) =>
+    `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(key.slice(5, 7)) - 1]} ${Number(key.slice(8, 10))}`,
   less: "Less",
   more: "More",
   noData: "no data",

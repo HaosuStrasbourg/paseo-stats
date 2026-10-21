@@ -16,7 +16,7 @@ import { dayKey, paseoHome } from "./env.server.ts";
 import { filesCard } from "./files.server.ts";
 import { findGrokSession, grokSessionVersion, grokTokensSince, readGrokStats, type GrokStats } from "./grok.server.ts";
 import type { LiveTracker } from "./live.server.ts";
-import { readQuota, windowStart } from "./quota.server.ts";
+import { readQuota, sameReset, windowStart } from "./quota.server.ts";
 import {
   cacheHitRate,
   costUsd,
@@ -330,13 +330,16 @@ export class StatsService {
 
     const quota = await readQuota(provider);
     const deltas = live.quotaDelta?.deltas ?? {};
+    const deltaResets = live.quotaDelta?.resets;
     const quotas: QuotaRow[] = [];
     for (const w of quota?.windows ?? []) {
       quotas.push({
         key: w.key,
         percent: w.percent,
         resetsAt: w.resetsAt,
-        turnDelta: deltas[w.key] ?? null,
+        // A delta from a window that has since reset says nothing about the current one.
+        // (Deltas saved before reset times were recorded are kept as they were.)
+        turnDelta: deltaResets && !sameReset(deltaResets[w.key], w.resetsAt) ? null : (deltas[w.key] ?? null),
         windowTokens: withWindows ? await windowTokens(provider, windowStart(w)) : null,
       });
     }

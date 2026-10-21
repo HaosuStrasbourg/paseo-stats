@@ -23,7 +23,12 @@ interface Persisted {
   /** toolUseId -> ms spent waiting for the user to approve */
   permissionWaits: Record<string, number>;
   /** Percentage points the last finished turn consumed, per quota window. */
-  quotaDelta: { deltas: Partial<Record<QuotaKey, number | null>>; turnId: string | null } | null;
+  quotaDelta: {
+    deltas: Partial<Record<QuotaKey, number | null>>;
+    /** Reset time of the window each delta was measured in, to drop it once that window resets. */
+    resets?: Partial<Record<QuotaKey, string | null>>;
+    turnId: string | null;
+  } | null;
   /** Quota reading taken when the current turn started (survives a plugin reload mid-turn). */
   quotaBefore: QuotaSnapshot | null;
   /**
@@ -258,8 +263,12 @@ export class LiveTracker {
     if (controller.signal.aborted || !after) return;
     a.quotaPending = null;
     const deltas: Partial<Record<QuotaKey, number | null>> = {};
-    for (const w of after.windows) deltas[w.key] = windowDelta(before.windows.find((b) => b.key === w.key), w);
-    a.quotaDelta = { deltas, turnId };
+    const resets: Partial<Record<QuotaKey, string | null>> = {};
+    for (const w of after.windows) {
+      deltas[w.key] = windowDelta(before.windows.find((b) => b.key === w.key), w);
+      resets[w.key] = w.resetsAt;
+    }
+    a.quotaDelta = { deltas, resets, turnId };
     a.dirty = true;
   }
 }
