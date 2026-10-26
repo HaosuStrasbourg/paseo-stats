@@ -1,14 +1,15 @@
 {
   "name": "paseo-stats",
-  "version": "0.1.0",
-  "description": "Paseo plugin: stat pills and cards for Claude Code and Grok agents (quota, speed, tokens, files changed, daily heatmap). Reads local files only.",
+  "version": "0.2.0-beta.1",
+  "description": "Paseo plugin: local stat pills and cards for Claude Code, Grok and Codex agents (quota, tokens, session metrics, files changed, daily heatmap).",
   "keywords": [
     "paseo",
     "paseo-plugin",
     "claude-code",
     "grok",
     "usage",
-    "tokens"
+    "tokens",
+    "codex"
   ],
   "license": "MIT",
   "files": [
@@ -26,7 +27,8 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "stats": "node scripts/stats-cli.ts"
+    "stats": "node scripts/stats-cli.ts",
+    "test": "node --test scripts/codex.test.ts scripts/service.test.ts"
   },
   "devDependencies": {
     "@getpaseo/plugin": "0.10.1",

@@ -30,6 +30,12 @@ export function grokSessionsRoot(): string {
   return path.join(env ? expandHome(env) : path.join(os.homedir(), ".grok"), "sessions");
 }
 
+/** Codex rollout logs only; no auth or configuration files are read. */
+export function codexSessionRoots(): string[] {
+  const env = process.env.CODEX_HOME?.trim();
+  return [path.join(env ? path.resolve(expandHome(env)) : path.join(os.homedir(), ".codex"), "sessions")];
+}
+
 export const TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const dayFormat = new Intl.DateTimeFormat("en-CA", {

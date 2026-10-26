@@ -14,6 +14,7 @@ import {
 import type { DailyStore } from "./daily.server.ts";
 import { dayKey, paseoHome } from "./env.server.ts";
 import { filesCard } from "./files.server.ts";
+import { codexTokensSince, findCodexSession, readCodexStats, type CodexStats } from "./codex.server.ts";
 import { findGrokSession, grokSessionVersion, grokTokensSince, readGrokStats, type GrokStats } from "./grok.server.ts";
 import type { LiveTracker } from "./live.server.ts";
 import { readQuota, sameReset, windowStart } from "./quota.server.ts";
@@ -245,6 +246,41 @@ function grokSpeed(g: GrokStats, turn: number | null): number | null {
 
 // ---- quota windows ----
 
+// Codex exposes trustworthy token records and per-turn TTFT. Rollout write times
+// do not establish streaming/model/tool duration, so those measurements stay unknown.
+const codexPaths = new Map<string, string>();
+const codexCache = new Map<string, { mtimeMs: number; size: number; stats: CodexStats }>();
+
+async function codexStats(sessionId: string): Promise<CodexStats | null> {
+  let file = codexPaths.get(sessionId) ?? null;
+  if (!file) {
+    file = await findCodexSession(sessionId);
+    if (!file) return null;
+    codexPaths.set(sessionId, file);
+  }
+  let st;
+  try {
+    st = await stat(file);
+  } catch {
+    codexPaths.delete(sessionId);
+    return null;
+  }
+  const cached = codexCache.get(file);
+  if (cached && cached.mtimeMs === st.mtimeMs && cached.size === st.size) return cached.stats;
+  const stats = await readCodexStats(file);
+  codexCache.set(file, { mtimeMs: st.mtimeMs, size: st.size, stats });
+  return stats;
+}
+
+function codexColumn(c: CodexStats, inTurn: boolean): StatsColumn {
+  const ttft = c.ttft.filter((t) => !inTurn || t.turn === c.lastTurn);
+  return {
+    ...EMPTY_COLUMN,
+    ttftMs: mean(ttft.map((t) => t.ms)),
+    calls: c.steps === null ? null : inTurn ? c.calls.filter((call) => call.turn === c.lastTurn).length : c.steps,
+  };
+}
+
 // Window sums read every source touched in the window, so cache them briefly.
 const WINDOW_CACHE_MS = 30_000;
 const windowCache = new Map<string, { at: number; tokens: number }>();
@@ -258,7 +294,8 @@ async function windowTokens(provider: ProviderId, rawStart: number | null): Prom
   const hit = windowCache.get(key);
   if (hit && now - hit.at < WINDOW_CACHE_MS) return hit.tokens;
   try {
-    const tokens = provider === "claude" ? await tokensSince(start) : await grokTokensSince(start);
+    const tokens = provider === "claude" ? await tokensSince(start)
+      : provider === "codex" ? await codexTokensSince(start) : await grokTokensSince(start);
     for (const [k, v] of windowCache) if (now - v.at >= WINDOW_CACHE_MS) windowCache.delete(k);
     windowCache.set(key, { at: now, tokens });
     return tokens;
@@ -346,6 +383,34 @@ export class StatsService {
     base.usage.quotas = quotas;
     base.usage.fetchedAt = quota ? new Date(quota.fetchedAtMs).toISOString() : null;
     if (!sessionId) return base;
+
+    if (provider === "codex") {
+      const c = await codexStats(sessionId).catch(() => null);
+      if (!c) return base;
+      return {
+        ...base,
+        turns: c.turns,
+        steps: c.steps,
+        usage: {
+          ...base.usage,
+          contextUsed: base.usage.contextUsed ?? c.contextUsed,
+          contextMax: base.usage.contextMax ?? c.contextMax,
+          compactions: c.compactions,
+        },
+        stats: { turn: codexColumn(c, true), session: codexColumn(c, false), tpsSeries: [], seriesUnit: "call" },
+        tokens: c.hasUsage ? {
+          ...tokenCard(c.session, {
+            cacheInvalidations: null,
+            costUsd: null,
+            turnCostUsd: null,
+            costSource: null,
+            models: c.models,
+          }),
+          cacheWrite: c.cacheWriteKnown ? c.session.cacheWrite : null,
+        } : { ...EMPTY_TOKENS, models: c.models },
+        files: c.fileChanges === null ? null : filesCard(c.fileChanges, c.lastTurn, c.cwd),
+      };
+    }
 
     if (provider === "claude") {
       const [stats, rates] = await Promise.all([claudeStats(sessionId).catch(() => null), readRates()]);

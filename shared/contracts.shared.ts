@@ -1,8 +1,8 @@
 import { defineRpc } from "@getpaseo/plugin";
 import { z } from "zod";
 
-export type ProviderId = "claude" | "grok";
-export const PROVIDERS: readonly ProviderId[] = ["claude", "grok"];
+export type ProviderId = "claude" | "grok" | "codex";
+export const PROVIDERS: readonly ProviderId[] = ["claude", "grok", "codex"];
 
 export function isProvider(value: unknown): value is ProviderId {
   return typeof value === "string" && (PROVIDERS as readonly string[]).includes(value);
@@ -153,6 +153,6 @@ export const readDetail = defineRpc({
 
 export const readHeatmap = defineRpc({
   name: "paseo-stats.heatmap",
-  input: z.object({ provider: z.enum(["claude", "grok"]) }),
+  input: z.object({ provider: z.enum(["claude", "grok", "codex"]) }),
   output: z.custom<Heatmap>(() => true),
 });

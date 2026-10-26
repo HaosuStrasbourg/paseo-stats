@@ -6,6 +6,7 @@ import path from "node:path";
 import type { ProviderId } from "../shared/contracts.shared.ts";
 import { dayKey, startOfLocalDay, stateDir } from "./env.server.ts";
 import { grokDaily } from "./grok.server.ts";
+import { scanCodexDaily } from "./codex.server.ts";
 import { scanDaily, type DayTotals } from "./transcript.server.ts";
 
 const dailyFile = () => path.join(stateDir(), "daily.json");
@@ -28,6 +29,10 @@ export async function writeJsonAtomic(file: string, value: unknown) {
 async function scan(provider: ProviderId, sinceMs?: number): Promise<{ days: Record<string, DayTotals>; complete: boolean }> {
   if (provider === "claude") {
     const r = await scanDaily(sinceMs === undefined ? {} : { sinceMs });
+    return { days: r.days, complete: r.errors.length === 0 };
+  }
+  if (provider === "codex") {
+    const r = await scanCodexDaily(sinceMs === undefined ? {} : { sinceMs });
     return { days: r.days, complete: r.errors.length === 0 };
   }
   return { days: await grokDaily(sinceMs), complete: true };
@@ -68,7 +73,7 @@ export class DailyStore {
         const now = Date.now();
         const since = startOfLocalDay(now, 1);
         const windowStart = dayKey(since);
-        for (const provider of ["claude", "grok"] as const) {
+        for (const provider of ["claude", "grok", "codex"] as const) {
           const full = !this.data.backfilledAt[provider];
           const result = await scan(provider, full ? undefined : since);
           const stored = (this.data.days[provider] ??= {});

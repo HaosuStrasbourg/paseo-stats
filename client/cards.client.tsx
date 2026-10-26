@@ -137,7 +137,7 @@ export function UsageCardContent(props: PluginButtonContentProps) {
           {d.usage.quotas.length > 0 ? (
             d.usage.quotas.map((row) => <QuotaBlock key={row.key} row={row} theme={theme} />)
           ) : (
-            <Text style={{ fontSize: 11, color: theme.colors.foregroundMuted }}>{T.noQuota}</Text>
+            <Text style={{ fontSize: 11, color: theme.colors.foregroundMuted }}>{provider === "codex" ? T.noCodexQuota : T.noQuota}</Text>
           )}
           <Rule theme={theme} />
           <MutedLine
@@ -291,7 +291,9 @@ export function FilesCardContent(props: PluginButtonContentProps) {
     <Card title={T.filesTitle} theme={theme} sub={T.thisSession}>
       {!q.data ? (
         <Status theme={theme} loading={q.isLoading} error={q.error} />
-      ) : !f || f.list.length === 0 ? (
+      ) : !f ? (
+        <Text style={{ fontSize: 12, color: muted }}>{T.filesUnknown}</Text>
+      ) : f.list.length === 0 ? (
         <Text style={{ fontSize: 12, color: muted }}>{T.filesNone}</Text>
       ) : (
         <>

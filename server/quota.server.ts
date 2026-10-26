@@ -8,6 +8,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { ProviderId, QuotaKey } from "../shared/contracts.shared.ts";
 import { paseoHome } from "./env.server.ts";
+import { readCodexQuota } from "./codex.server.ts";
 
 export interface QuotaWindow {
   key: QuotaKey;
@@ -29,9 +30,10 @@ const READINGS: Record<ProviderId, { id: string; key: QuotaKey }[]> = {
   ],
   // Needs the entry's source pointed at `/v1/billing?format=credits` (see README).
   grok: [{ id: "weekly", key: "sevenDay" }],
+  codex: [], // Codex snapshots are read from local rollout events, not usage-monitor.
 };
 
-const PRESETS: Record<ProviderId, string> = { claude: "claude", grok: "grok" };
+const PRESETS: Record<ProviderId, string> = { claude: "claude", grok: "grok", codex: "codex" };
 
 async function readJson(file: string): Promise<any> {
   try {
@@ -70,6 +72,7 @@ function readWindow(provider: ProviderId, readings: unknown, id: string, key: Qu
 }
 
 export async function readQuota(provider: ProviderId): Promise<QuotaSnapshot | null> {
+  if (provider === "codex") return readCodexQuota();
   const [entryId, raw] = await Promise.all([
     entryIdFor(provider),
     readJson(path.join(paseoHome(), "usage-limits", "last-readings.json")),

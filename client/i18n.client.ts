@@ -28,7 +28,7 @@ export function relativeTo(iso: string | null | undefined): string {
   return Number.isFinite(t) ? T.relative(t - Date.now()) : "—";
 }
 
-const PROVIDER_NAME: Record<ProviderId, string> = { claude: "Claude", grok: "Grok" };
+const PROVIDER_NAME: Record<ProviderId, string> = { claude: "Claude", grok: "Grok", codex: "Codex" };
 
 const zh = {
   pillTitle: { usage: "用量", stats: "会话统计", tokens: "Token", files: "文件改动" },
@@ -46,6 +46,7 @@ const zh = {
   resetsUnknown: "重置时间 —",
   windowTokens: (n: string) => `本机 ${n} tok`,
   noQuota: "无额度数据（需要 usage-monitor 插件）",
+  noCodexQuota: "暂无 Codex 本地额度数据",
   compactions: (n: string) => `上下文压缩 ${n} 次`,
   quotaAsOf: (clock: string, rel: string) => `额度数据 ${clock}（${rel}）`,
   quotaAsOfUnknown: "额度数据 —",
@@ -107,6 +108,7 @@ const zh = {
   linesRemoved: "删除行",
   filesMore: (n: number) => `还有 ${n} 个文件`,
   filesNone: "本会话还没有通过文件工具改动文件",
+  filesUnknown: "文件改动数据不可用",
   filesNote: "只统计写入/编辑类工具；用命令行改的文件不计",
   times: (n: string) => `${n} 次`,
   withDetail: (a: string, b: string) => `${a}（${b}）`,
@@ -134,6 +136,7 @@ const en: typeof zh = {
   resetsUnknown: "resets —",
   windowTokens: (n) => `here ${n} tok`,
   noQuota: "No quota data (needs the usage-monitor plugin)",
+  noCodexQuota: "No local Codex quota data",
   compactions: (n) => `${n} compactions`,
   quotaAsOf: (clock, rel) => `quota as of ${clock} (${rel})`,
   quotaAsOfUnknown: "quota as of —",
@@ -195,6 +198,7 @@ const en: typeof zh = {
   linesRemoved: "Lines removed",
   filesMore: (n) => `${n} more`,
   filesNone: "No files changed through file tools yet",
+  filesUnknown: "File change data unavailable",
   filesNote: "Counts write/edit tools only; shell edits are not seen",
   times: (n) => n,
   withDetail: (a, b) => `${a} (${b})`,
